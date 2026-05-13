@@ -1,71 +1,86 @@
-import tkinter as tk
-from tkinter import messagebox
-import os
-import sys
+import customtkinter as ctk
 
-def abrir_archivo(nombre_archivo):
-    """
-    Función para cerrar la ventana actual y abrir un nuevo módulo.
-    """
-    try:
-        # Cerramos la ventana actual de inicio
-        root.destroy()
-        # Ejecutamos el archivo solicitado
-        os.system(f"python {nombre_archivo}")
-    except Exception as e:
-        messagebox.showerror("Error", f"No se pudo abrir {nombre_archivo}: {e}")
+# Configuración de tema oscuro
+ctk.set_appearance_mode("dark")
+ctk.set_default_color_theme("blue")
 
-# Configuración de la ventana principal
-root = tk.Tk()
-root.title("Sistema de Gestión Personal - Inicio")
-root.geometry("1000x600")
-root.configure(bg="#f8f9fa")
+class AppAgenda(ctk.CTk):
+    def __init__(self):
+        super().__init__()
 
-# --- FRAME LATERAL (NAVEGACIÓN) ---
-frame_navegacion = tk.Frame(root, bg="#212529", width=200)
-frame_navegacion.pack(side="left", fill="y")
+        # Configuración de la ventana principal
+        self.title("Agenda Personal Pro")
+        self.geometry("1100x700")
+        self.configure(fg_color="#1a1a1a")
 
-# Título del menú
-lbl_menu = tk.Label(frame_navegacion, text="MENÚ", font=("Arial", 14, "bold"), 
-                    bg="#212529", fg="white", pady=20)
-lbl_menu.pack()
+        # Layout: 2 columnas
+        self.grid_columnconfigure(1, weight=1)
+        self.grid_rowconfigure(0, weight=1)
 
-# Lista de botones y sus archivos correspondientes
-botones = [
-    ("Inicio", "inicio.py"),
-    ("Contactos", "contacto.py"),
-    ("Contraseñas", "contrasena.py"),
-    ("Calendario", "calendario.py"),
-    ("Horarios", "horarios.py"),
-    ("Citas", "citas.py"),
-    ("Proyectos", "proyectos.py"),
-    ("Hábitos", "habitos.py"),
-    ("To Do List", "to_do_list.py"),
-    ("Notas", "notas.py"),
-    ("Entrenamiento", "entrenamiento.py"),
-    ("Datos Físicos", "datos_fisicos.py"),
-    ("Ingresos", "ingresos.py"),
-    ("Egresos", "egresos.py"),
-]
+        # --- SIDEBAR DESPLAZABLE (Scrollable Frame) ---
+        # Cambiamos CTkFrame por CTkScrollableFrame
+        self.sidebar = ctk.CTkScrollableFrame(self, width=220, corner_radius=0, 
+                                              fg_color="#212121", 
+                                              scrollbar_button_color="#454545",
+                                              scrollbar_button_hover_color="#5a5a5a")
+        self.sidebar.grid(row=0, column=0, sticky="nsew")
+        
+        # Logo dentro del scroll
+        self.logo_label = ctk.CTkLabel(self.sidebar, text="MI AGENDA", 
+                                       font=ctk.CTkFont(size=22, weight="bold"),
+                                       text_color="white")
+        self.logo_label.pack(pady=(20, 20))
 
-# Creación dinámica de botones
-for nombre, archivo in botones:
-    btn = tk.Button(frame_navegacion, text=nombre, font=("Arial", 11),
-                    bg="#212529", fg="white", bd=0, padx=20, pady=10,
-                    anchor="w", activebackground="#343a40", activeforeground="#20c997",
-                    command=lambda a=archivo: abrir_archivo(a))
-    btn.pack(fill="x")
+        # --- ÁREA DE CONTENIDO ---
+        self.contenedor_principal = ctk.CTkFrame(self, corner_radius=0, fg_color="#1a1a1a")
+        self.contenedor_principal.grid(row=0, column=1, sticky="nsew")
 
-# --- FRAME PRINCIPAL (CONTENIDO) ---
-frame_contenido = tk.Frame(root, bg="white", padx=20, pady=20)
-frame_contenido.pack(side="right", expand=True, fill="both")
+        self.crear_botones_menu()
+        self.mostrar_bienvenida()
 
-lbl_bienvenida = tk.Label(frame_contenido, text="Panel de Inicio", 
-                          font=("Arial", 24, "bold"), bg="white", fg="#333")
-lbl_bienvenida.pack(pady=20)
+    def crear_botones_menu(self):
+        """Genera todos los botones con el scroll activo"""
+        opciones = [
+            ("Inicio", "#3b5998"), ("Contactos", "#454545"), 
+            ("Contraseñas", "#454545"), ("Calendario", "#454545"),
+            ("Horarios", "#454545"), ("Citas", "#454545"), 
+            ("Proyectos", "#454545"), ("Hábitos", "#454545"),
+            ("To Do List", "#454545"), ("Notas", "#454545"), 
+            ("Entrenamiento", "#454545"), ("Datos Físicos", "#454545"),
+            ("Ingresos", "#28a745"), ("Egresos", "#dc3545")
+        ]
 
-lbl_instrucciones = tk.Label(frame_contenido, text="Selecciona una opción del menú lateral para comenzar.", 
-                             font=("Arial", 12), bg="white", fg="#666")
-lbl_instrucciones.pack()
+        for texto, color in opciones:
+            btn = ctk.CTkButton(self.sidebar, text=texto, 
+                                fg_color=color,
+                                hover_color="#5a5a5a",
+                                height=40,
+                                font=ctk.CTkFont(size=13),
+                                command=lambda t=texto: self.cambiar_seccion(t))
+            btn.pack(fill="x", padx=10, pady=5)
 
-root.mainloop()
+    def limpiar_contenedor(self):
+        for widget in self.contenedor_principal.winfo_children():
+            widget.destroy()
+
+    def mostrar_bienvenida(self):
+        self.limpiar_contenedor()
+        label_bienvenida = ctk.CTkLabel(self.contenedor_principal, 
+                                        text="Bienvenido a tu agenda app", 
+                                        font=ctk.CTkFont(size=32, weight="bold"),
+                                        text_color="#ffffff")
+        label_bienvenida.place(relx=0.5, rely=0.5, anchor="center")
+
+    def cambiar_seccion(self, nombre):
+        if nombre == "Inicio":
+            self.mostrar_bienvenida()
+        else:
+            self.limpiar_contenedor()
+            lbl = ctk.CTkLabel(self.contenedor_principal, 
+                               text=f"Sección de {nombre}\n(En desarrollo)", 
+                               font=ctk.CTkFont(size=24))
+            lbl.place(relx=0.5, rely=0.5, anchor="center")
+
+if __name__ == "__main__":
+    app = AppAgenda()
+    app.mainloop()
