@@ -1,4 +1,5 @@
 import customtkinter as ctk
+from contacto import ContactosFrame
 
 # Configuración de tema oscuro
 ctk.set_appearance_mode("dark")
@@ -41,13 +42,13 @@ class AppAgenda(ctk.CTk):
     def crear_botones_menu(self):
         """Genera todos los botones con el scroll activo"""
         opciones = [
-            ("Inicio", "#3b5998"), ("Contactos", "#454545"), 
+            ("Inicio", "#0d6efd"), ("Contactos", "#454545"), 
             ("Contraseñas", "#454545"), ("Calendario", "#454545"),
             ("Horarios", "#454545"), ("Citas", "#454545"), 
             ("Proyectos", "#454545"), ("Hábitos", "#454545"),
             ("To Do List", "#454545"), ("Notas", "#454545"), 
             ("Entrenamiento", "#454545"), ("Datos Físicos", "#454545"),
-            ("Ingresos", "#28a745"), ("Egresos", "#dc3545")
+            ("Ingresos", "#198754"), ("Egresos", "#dc3545")
         ]
 
         for texto, color in opciones:
@@ -72,13 +73,15 @@ class AppAgenda(ctk.CTk):
         label_bienvenida.place(relx=0.5, rely=0.5, anchor="center")
 
     def cambiar_seccion(self, nombre):
+        self.limpiar_contenedor()
         if nombre == "Inicio":
             self.mostrar_bienvenida()
+        elif nombre == "Contactos":
+            # Llamamos a la clase que creamos en contacto.py
+            frame_contactos = ContactosFrame(self.contenedor_principal)
+            frame_contactos.pack(expand=True, fill="both")
         else:
-            self.limpiar_contenedor()
-            lbl = ctk.CTkLabel(self.contenedor_principal, 
-                               text=f"Sección de {nombre}\n(En desarrollo)", 
-                               font=ctk.CTkFont(size=24))
+            lbl = ctk.CTkLabel(self.contenedor_principal, text=f"Sección {nombre} en desarrollo")
             lbl.place(relx=0.5, rely=0.5, anchor="center")
 
 if __name__ == "__main__":
