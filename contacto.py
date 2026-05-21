@@ -3,13 +3,15 @@ from tkinter import messagebox
 import database
 
 class ContactosFrame(ctk.CTkFrame):
-    def __init__(self, master):
+    # Agregamos callback_ver como parámetro obligatorio
+    def __init__(self, master, callback_ver):
         super().__init__(master, fg_color="transparent")
         
+        self.callback_ver = callback_ver
         self.pagina_actual = 0
         self.contactos_por_pagina = 8
         self.contacto_seleccionado = None 
-        self.widgets_seleccionados = [] # Inicialización para evitar el AttributeError
+        self.widgets_seleccionados = [] 
 
         # Título
         self.label_titulo = ctk.CTkLabel(self, text="MIS CONTACTOS", font=ctk.CTkFont(size=24, weight="bold"))
@@ -33,6 +35,12 @@ class ContactosFrame(ctk.CTkFrame):
                                              fg_color="#6c757d", hover_color="#5a6268",
                                              command=self.confirmar_restablecer)
         self.btn_restablecer.pack(side="left", padx=5)
+
+        # Botón Ver contacto
+        self.btn_ver = ctk.CTkButton(self.frame_acciones, text="Ver contacto", 
+                                     fg_color="#0d6efd", hover_color="#0b5ed7",
+                                     command=self.ejecutar_ver_contacto)
+        self.btn_ver.pack(side="left", padx=5)
 
         # Buscador
         self.entry_busqueda = ctk.CTkEntry(self, placeholder_text="Buscar por nombre o apellido...", width=400)
@@ -66,6 +74,14 @@ class ContactosFrame(ctk.CTkFrame):
         # Aplicar color de selección
         for w in self.widgets_seleccionados:
             w.configure(fg_color="#052C65")
+            
+    def ejecutar_ver_contacto(self):
+        if self.contacto_seleccionado is None:
+            messagebox.showwarning("Atención", "Por favor, selecciona un contacto de la tabla primero.")
+            return
+            
+        # Ejecuta de forma correcta el cambio de pantalla
+        self.callback_ver(self.contacto_seleccionado)
 
     def confirmar_eliminacion(self):
         if self.contacto_seleccionado is None:
@@ -169,7 +185,6 @@ class ContactosFrame(ctk.CTkFrame):
         for widget in self.pag_container.winfo_children():
             widget.destroy()
 
-        # Botón Anterior con color #454545
         btn_prev = ctk.CTkButton(self.pag_container, text="< Anterior", width=100, 
                                  fg_color="#454545", hover_color="#5a5a5a", 
                                  command=self.prev_pag,
@@ -179,7 +194,6 @@ class ContactosFrame(ctk.CTkFrame):
         total_pag = (total_items - 1) // self.contactos_por_pagina + 1
         ctk.CTkLabel(self.pag_container, text=f"Página {self.pagina_actual + 1} de {max(1, total_pag)}").pack(side="left", padx=20)
 
-        # Botón Siguiente con color #454545
         btn_next = ctk.CTkButton(self.pag_container, text="Siguiente >", width=100, 
                                  fg_color="#454545", hover_color="#5a5a5a",
                                  command=self.next_pag,

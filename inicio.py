@@ -1,7 +1,7 @@
 import customtkinter as ctk
 from contacto import ContactosFrame
+from ver_contacto import VerContactoFrame  # Importamos la vista detallada
 
-# Configuración de tema oscuro
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("blue")
 
@@ -9,30 +9,24 @@ class AppAgenda(ctk.CTk):
     def __init__(self):
         super().__init__()
 
-        # Configuración de la ventana principal
         self.title("Agenda Personal Pro")
         self.geometry("1100x700")
         self.configure(fg_color="#1a1a1a")
 
-        # Layout: 2 columnas
         self.grid_columnconfigure(1, weight=1)
         self.grid_rowconfigure(0, weight=1)
 
-        # --- SIDEBAR DESPLAZABLE (Scrollable Frame) ---
-        # Cambiamos CTkFrame por CTkScrollableFrame
         self.sidebar = ctk.CTkScrollableFrame(self, width=220, corner_radius=0, 
                                               fg_color="#212121", 
                                               scrollbar_button_color="#454545",
                                               scrollbar_button_hover_color="#5a5a5a")
         self.sidebar.grid(row=0, column=0, sticky="nsew")
         
-        # Logo dentro del scroll
         self.logo_label = ctk.CTkLabel(self.sidebar, text="MI AGENDA", 
                                        font=ctk.CTkFont(size=22, weight="bold"),
                                        text_color="white")
         self.logo_label.pack(pady=(20, 20))
 
-        # --- ÁREA DE CONTENIDO ---
         self.contenedor_principal = ctk.CTkFrame(self, corner_radius=0, fg_color="#1a1a1a")
         self.contenedor_principal.grid(row=0, column=1, sticky="nsew")
 
@@ -40,7 +34,6 @@ class AppAgenda(ctk.CTk):
         self.mostrar_bienvenida()
 
     def crear_botones_menu(self):
-        """Genera todos los botones con el scroll activo"""
         opciones = [
             ("Inicio", "#0d6efd"), ("Contactos", "#454545"), 
             ("Contraseñas", "#454545"), ("Calendario", "#454545"),
@@ -77,12 +70,25 @@ class AppAgenda(ctk.CTk):
         if nombre == "Inicio":
             self.mostrar_bienvenida()
         elif nombre == "Contactos":
-            # Llamamos a la clase que creamos en contacto.py
-            frame_contactos = ContactosFrame(self.contenedor_principal)
+            # Pasamos una función lambda como callback para cambiar a la vista de detalle
+            frame_contactos = ContactosFrame(
+                self.contenedor_principal, 
+                callback_ver=lambda id_c: self.ir_a_ver_contacto(id_c)
+            )
             frame_contactos.pack(expand=True, fill="both")
         else:
             lbl = ctk.CTkLabel(self.contenedor_principal, text=f"Sección {nombre} en desarrollo")
             lbl.place(relx=0.5, rely=0.5, anchor="center")
+
+    def ir_a_ver_contacto(self, id_contacto):
+        from ver_contacto import VerContactoFrame
+        self.limpiar_contenedor()
+        frame_detalle = VerContactoFrame(
+            self.contenedor_principal,
+            id_contacto=id_contacto,
+            callback_volver=lambda: self.cambiar_seccion("Contactos")
+        )
+        frame_detalle.pack(expand=True, fill="both")
 
 if __name__ == "__main__":
     app = AppAgenda()
